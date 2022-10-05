@@ -1,0 +1,115 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Workspace name"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Specifies the location in which to create the workspace."
+      }
+    },
+    "automationAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Automation account name"
+      }
+    },
+    "samplePowerShellRunbookName": {
+      "type": "String",
+      "defaultValue": "AzureAutomationTutorialScript"
+    },
+    "samplePowerShellRunbookDescription": {
+      "type": "String",
+      "defaultValue": "An example runbook that gets all the Resource Manager resources by using the Run As account (service principal)."
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "defaultValue": "[deployment().properties.templateLink.uri]",
+      "metadata": {
+        "description": "URI to artifacts location"
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated"
+      }
+    }
+  },
+  "variables": {
+      "jobScheduleName": "jobSchedule246",
+      "scheduleName": "schedule246"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Automation/automationAccounts",
+      "apiVersion": "2020-01-13-preview",
+      "name": "[parameters('automationAccountName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[parameters('workspaceName')]"
+      ],
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "sku": {
+          "name": "Basic"
+        }
+      },
+      "resources": [
+        {
+          "type": "runbooks",
+          "apiVersion": "2020-01-13-preview",
+          "name": "[parameters('samplePowerShellRunbookName')]",
+          "location": "[parameters('location')]",
+          "dependsOn": [
+            "[parameters('automationAccountName')]"
+          ],
+          "properties": {
+            "runbookType": "Python3",
+            "logProgress": "false",
+            "logVerbose": "false",
+            "publishContentLink": {
+              "uri": "[uri(parameters('_artifactsLocation'), concat('scripts/AzureAutomationTutorial.ps1', parameters('_artifactsLocationSasToken')))]",
+              "version": "1.0.0.0"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Automation/automationAccounts/schedules",
+      "apiVersion": "2020-01-13-preview",
+      "name": "[variables('scheduleName')]",
+      "properties": {
+        "frequency": "minute",
+        "interval": 30,
+        "startTime": "2022-01-01T00:00:00Z"
+      }
+    },
+    {
+      "type": "Microsoft.Automation/automationAccounts/jobSchedules",
+      "apiVersion": "2020-01-13-preview",
+      "name": "[variables('jobScheduleName')]",
+      "properties": {
+        "parameters": {},
+        "runbook": {
+          "name": "[parameters('samplePowerShellRunbookName')]"
+        },
+        "runOn": "string",
+        "schedule": {
+          "name": "[variables('scheduleName')]"
+        }
+      }
+    }
+  ]
+}
