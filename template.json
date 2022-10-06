@@ -2,12 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "workspaceName": {
-      "type": "string",
-      "metadata": {
-        "description": "Workspace name"
-      }
-    },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
@@ -24,10 +18,6 @@
     "samplePowerShellRunbookName": {
       "type": "String",
       "defaultValue": "AzureAutomationTutorialScript"
-    },
-    "samplePowerShellRunbookDescription": {
-      "type": "String",
-      "defaultValue": "An example runbook that gets all the Resource Manager resources by using the Run As account (service principal)."
     },
     "_artifactsLocation": {
       "type": "string",
@@ -54,9 +44,6 @@
       "apiVersion": "2020-01-13-preview",
       "name": "[parameters('automationAccountName')]",
       "location": "[parameters('location')]",
-      "dependsOn": [
-        "[parameters('workspaceName')]"
-      ],
       "identity": {
         "type": "SystemAssigned"
       },
@@ -89,10 +76,10 @@
     {
       "type": "Microsoft.Automation/automationAccounts/schedules",
       "apiVersion": "2020-01-13-preview",
-      "name": "[variables('scheduleName')]",
+      "name": "[concat(variables('scheduleName'),'1')]",
       "properties": {
-        "frequency": "minute",
-        "interval": 30,
+        "frequency": "hour",
+        "interval": 1,
         "startTime": "2022-01-01T00:00:00Z"
       }
     },
@@ -101,13 +88,42 @@
       "apiVersion": "2020-01-13-preview",
       "name": "[variables('jobScheduleName')]",
       "properties": {
-        "parameters": {},
+        "parameters": {
+          "AppService": "funkcja",
+          "State": "on"
+        },
         "runbook": {
           "name": "[parameters('samplePowerShellRunbookName')]"
         },
-        "runOn": "string",
         "schedule": {
-          "name": "[variables('scheduleName')]"
+          "name": "[concat(variables('scheduleName'),'1')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Automation/automationAccounts/schedules",
+      "apiVersion": "2020-01-13-preview",
+      "name": "[concat(variables('scheduleName'),'2')]",
+      "properties": {
+        "frequency": "hour",
+        "interval": 1,
+        "startTime": "2022-01-01T00:30:00Z"
+      }
+    },
+    {
+      "type": "Microsoft.Automation/automationAccounts/jobSchedules",
+      "apiVersion": "2020-01-13-preview",
+      "name": "[variables('jobScheduleName')]",
+      "properties": {
+        "parameters": {
+          "AppService": "funkcja",
+          "State": "on"
+        },
+        "runbook": {
+          "name": "[parameters('samplePowerShellRunbookName')]"
+        },
+        "schedule": {
+          "name": "[concat(variables('scheduleName'),'2')]"
         }
       }
     }

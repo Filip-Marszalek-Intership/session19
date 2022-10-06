@@ -2,8 +2,13 @@ workflow MyFirstRunbook-Workflow
 {
 $resourceGroup = "Cap.Filip-Marszalek",
 Param(
-    [string]$AppService,
-    [string]$State
+    [Parameter(Mandatory=$true)]
+    [string]
+    $AppService,
+    
+    [Parameter(Mandatory=$true)]
+    [string]
+    $State
 )
 
 # Ensures you do not inherit an AzContext in your runbook
