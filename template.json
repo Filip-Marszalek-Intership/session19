@@ -15,9 +15,9 @@
         "description": "Automation account name"
       }
     },
-    "samplePowerShellRunbookName": {
+    "PythonRunbookName": {
       "type": "String",
-      "defaultValue": "AzureAutomationTutorialScript"
+      "defaultValue": "AzureAutomationPythonScript"
     },
     "_artifactsLocation": {
       "type": "string",
@@ -56,7 +56,7 @@
         {
           "type": "runbooks",
           "apiVersion": "2020-01-13-preview",
-          "name": "[parameters('samplePowerShellRunbookName')]",
+          "name": "[parameters('PythonRunbookName')]",
           "location": "[parameters('location')]",
           "dependsOn": [
             "[parameters('automationAccountName')]"
@@ -93,7 +93,7 @@
           "State": "on"
         },
         "runbook": {
-          "name": "[parameters('samplePowerShellRunbookName')]"
+          "name": "[parameters('PythonRunbookName')]"
         },
         "schedule": {
           "name": "[concat(variables('scheduleName'),'1')]"
@@ -120,7 +120,7 @@
           "State": "on"
         },
         "runbook": {
-          "name": "[parameters('samplePowerShellRunbookName')]"
+          "name": "[parameters('PythonRunbookName')]"
         },
         "schedule": {
           "name": "[concat(variables('scheduleName'),'2')]"

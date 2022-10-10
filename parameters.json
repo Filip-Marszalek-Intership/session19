@@ -4,6 +4,9 @@
     "parameters": {
       "runBookURL": {
         "value": "https://dev.azure.com/filip246/az-and-devops/_git/Azure%20Automation?path=%2Frunbook.ps1"
+      },
+      "automationAccountName": {
+        "value": "automationAccount246"
       }
     }
   }
