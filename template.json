@@ -19,23 +19,24 @@
       "type": "String",
       "defaultValue": "AzureAutomationPythonScript"
     },
-    "_artifactsLocation": {
+    "schedule1StartTime": {
       "type": "string",
-      "defaultValue": "[deployment().properties.templateLink.uri]",
+      "defaultValue": "2023-01-01T00:00:00Z",
       "metadata": {
-        "description": "URI to artifacts location"
+        "description": "Start date of schedule1"
       }
     },
-    "_artifactsLocationSasToken": {
-      "type": "securestring",
-      "defaultValue": "",
+    "schedule2StartTime": {
+      "type": "string",
+      "defaultValue": "2023-01-01T00:30:00Z",
       "metadata": {
-        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated"
+        "description": "Start date of schedule1"
       }
     }
   },
   "variables": {
-      "jobScheduleName": "jobSchedule246",
+      "jobScheduleName1": "[guid('name1')]",
+      "jobScheduleName2": "[guid('name2')]",
       "scheduleName": "schedule246"
   },
   "resources": [
@@ -66,7 +67,7 @@
             "logProgress": "false",
             "logVerbose": "false",
             "publishContentLink": {
-              "uri": "[uri(parameters('_artifactsLocation'), concat('scripts/AzureAutomationTutorial.ps1', parameters('_artifactsLocationSasToken')))]",
+              "uri": "https://raw.githubusercontent.com/Filip-Marszalek-Intership/session19/master/runbook.ps1",
               "version": "1.0.0.0"
             }
           }
@@ -76,20 +77,24 @@
     {
       "type": "Microsoft.Automation/automationAccounts/schedules",
       "apiVersion": "2020-01-13-preview",
-      "name": "[concat(variables('scheduleName'),'1')]",
+      "name": "[concat(parameters('automationAccountName'),'/',variables('scheduleName'),'1')]",
       "properties": {
         "frequency": "hour",
         "interval": 1,
-        "startTime": "2022-01-01T00:00:00Z"
+        "startTime": "[parameters('schedule1StartTime')]"
       }
     },
     {
       "type": "Microsoft.Automation/automationAccounts/jobSchedules",
       "apiVersion": "2020-01-13-preview",
-      "name": "[variables('jobScheduleName')]",
+      "name": "[concat(parameters('automationAccountName'),'/',variables('jobScheduleName1'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Automation/automationAccounts/schedules/',parameters('automationAccountName'), concat(variables('scheduleName'),'1'))]",
+        "[resourceId('Microsoft.Automation/automationAccounts/runbooks/',parameters('automationAccountName'), parameters('PythonRunbookName'))]"
+      ],
       "properties": {
         "parameters": {
-          "AppService": "funkcja",
+          "AppService": "vmControlFun",
           "State": "on"
         },
         "runbook": {
@@ -103,20 +108,24 @@
     {
       "type": "Microsoft.Automation/automationAccounts/schedules",
       "apiVersion": "2020-01-13-preview",
-      "name": "[concat(variables('scheduleName'),'2')]",
+      "name": "[concat(parameters('automationAccountName'),'/',variables('scheduleName'),'2')]",
       "properties": {
         "frequency": "hour",
         "interval": 1,
-        "startTime": "2022-01-01T00:30:00Z"
+        "startTime": "[parameters('schedule2StartTime')]"
       }
     },
     {
       "type": "Microsoft.Automation/automationAccounts/jobSchedules",
       "apiVersion": "2020-01-13-preview",
-      "name": "[variables('jobScheduleName')]",
+      "name": "[concat(parameters('automationAccountName'),'/',variables('jobScheduleName2'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Automation/automationAccounts/schedules/',parameters('automationAccountName'), concat(variables('scheduleName'),'2'))]",
+        "[resourceId('Microsoft.Automation/automationAccounts/runbooks/',parameters('automationAccountName'), parameters('PythonRunbookName'))]"
+      ],
       "properties": {
         "parameters": {
-          "AppService": "funkcja",
+          "AppService": "vmControlFun",
           "State": "on"
         },
         "runbook": {
